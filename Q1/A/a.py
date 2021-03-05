@@ -38,7 +38,7 @@ class Sensor:
         measurement = np.random.choice([True, False], 1, p=[prob_detection, 1-prob_detection])[0]
         self.measurements.append(measurement)
 
-    
+# This function returns the next stochastic action.
 def transition_model(robot_bf, motion_model):
     choices = ['up', 'down', 'left', 'right']
     if robot_bf.x == 0:
@@ -67,7 +67,7 @@ for i in range(30):
     robot_bf.next_state(transition_model(robot_bf, motion_model))
     all_measure(all_sensors, robot_bf)   
 
-# Simulating the robot motion.
+# Simulating the robot motion through grid motion.
 fig = plt.figure(figsize=(10, 10))
 ax = fig.gca()
 ax.set_xticks(np.arange(0, 31, 1))
@@ -79,6 +79,7 @@ scatter_color = [1 if s.measurements[0] else 2 for s in all_sensors]
 scatter_color.insert(0, 0)
 scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap=cmap)
 
+# Handling how frames are updated in animation.
 def update_plot(i):
     col_map = [1 if s.measurements[i] else 2 for s in all_sensors]
     col_map.insert(0, 0)
