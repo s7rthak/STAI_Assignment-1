@@ -41,15 +41,24 @@ class Sensor:
 # This function returns the next stochastic action.
 def transition_model(robot_bf, motion_model):
     choices = ['up', 'down', 'left', 'right']
+    edge_corner = False
     if robot_bf.x == 0:
         choices.remove('left')
+        edge_corner = True
     if robot_bf.x == 29:
         choices.remove('right')
+        edge_corner = True
     if robot_bf.y == 0:
         choices.remove('down')
+        edge_corner = True
     if robot_bf.y == 29:
         choices.remove('up')
-    action_weights = [motion_model[motion] for motion in choices]
+        edge_corner = True
+    action_weights = None
+    if not edge_corner:
+        action_weights = [motion_model[motion] for motion in choices]
+    else:
+        action_weights = [1 for motion in choices]
     return random.choices(choices, action_weights, k=1)[0]
 
 # Robot motion model initialisation.
@@ -77,7 +86,7 @@ ax.set_ylim([-0.5, 29.5])
 cmap = colors.ListedColormap(['b', 'g', 'r'])
 scatter_color = [1 if s.measurements[0] else 2 for s in all_sensors]
 scatter_color.insert(0, 0)
-scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap=cmap)
+scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap=cmap, edgecolors='k')
 
 # Handling how frames are updated in animation.
 def update_plot(i):
