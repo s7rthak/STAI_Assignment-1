@@ -5,8 +5,8 @@ import matplotlib.animation as animation
 import matplotlib.colors as colors
 import numpy as np
 
-def manHattan(a, b):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+def distance(a, b):
+    return max(abs(a[0] - b[0]),abs(a[1] - b[1]))
 
 def all_measure(all_sensors, robot_bf):
     for sensor in all_sensors:
@@ -34,7 +34,7 @@ class Sensor:
         self.y = y
         self.measurements = []
     def measure(self, robot_bf):
-        prob_detection = max(0, 0.9 - manHattan((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
+        prob_detection = max(0, 0.9 - distance((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
         measurement = np.random.choice([True, False], 1, p=[prob_detection, 1-prob_detection])[0]
         self.measurements.append(measurement)
 
@@ -88,7 +88,7 @@ def update_plot(i):
     return scat, 
 
 plt.grid()
-ani = animation.FuncAnimation(fig, update_plot, frames=range(len(robot_bf.movement_history)), interval=500, repeat=False, blit=False)
-ani.save('a.gif')
+ani = animation.FuncAnimation(fig, update_plot, frames=range(len(robot_bf.movement_history)), interval=500, repeat=False, blit=True)
+ani.save('a.mp4')
 plt.show()
     
