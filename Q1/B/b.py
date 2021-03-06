@@ -79,8 +79,8 @@ def transition_model(robot_bf, motion_model):
 
 # Robot motion model initialisation.
 motion_model = { 'up': 0.4, 'down': 0.1, 'left': 0.2, 'right': 0.3 }
-# x, y = random.randrange(30), random.randrange(30)
-x, y = 15, 15
+x, y = random.randrange(30), random.randrange(30)
+# x, y = 15, 15
 robot_bf = Robot(x, y)
 
 # Sensor initialisation.
