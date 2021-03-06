@@ -16,7 +16,7 @@ for i in range(30):
         P[0,i,j] = 1/900
 
 
-def distance(a, b):
+def chebyshev(a, b):
     return max(abs(a[0] - b[0]),abs(a[1] - b[1]))
 
 def all_measure(all_sensors, robot_bf):
@@ -46,7 +46,7 @@ class Sensor:
         self.y = y
         self.measurements = []
     def measure(self, robot_bf):
-        prob_detection = max(0.4, 0.9 - distance((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
+        prob_detection = max(0.4, 0.9 - chebyshev((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
         # making sure probability remains zero outside the distribution
         if prob_detection == 0.4:
             prob_detection = 0
@@ -57,16 +57,16 @@ class Sensor:
 def transition_model(robot_bf, motion_model):
     choices = ['up', 'down', 'left', 'right']
     edge_corner = False
-    if robot_bf.x == 0.5:
+    if robot_bf.x == 0:
         choices.remove('left')
         edge_corner = True
-    if robot_bf.x == 29.5:
+    if robot_bf.x == 29:
         choices.remove('right')
         edge_corner = True
-    if robot_bf.y == 0.5:
+    if robot_bf.y == 0:
         choices.remove('down')
         edge_corner = True
-    if robot_bf.y == 29.5:
+    if robot_bf.y == 29:
         choices.remove('up')
         edge_corner = True
     action_weights = None
@@ -79,11 +79,12 @@ def transition_model(robot_bf, motion_model):
 
 # Robot motion model initialisation.
 motion_model = { 'up': 0.4, 'down': 0.1, 'left': 0.2, 'right': 0.3 }
-x, y = random.randrange(30)+0.5, random.randrange(30)+0.5
+# x, y = random.randrange(30), random.randrange(30)
+x, y = 15, 15
 robot_bf = Robot(x, y)
 
 # Sensor initialisation.
-sensor_1, sensor_2, sensor_3, sensor_4 = Sensor(7.5, 14.5), Sensor(14.5, 14.5), Sensor(21.5, 14.5), Sensor(14.5, 21.5)
+sensor_1, sensor_2, sensor_3, sensor_4 = Sensor(8, 15), Sensor(15, 15), Sensor(22, 15), Sensor(15, 22)
 all_sensors = [sensor_1, sensor_2, sensor_3, sensor_4]
 all_measure(all_sensors, robot_bf)
 
@@ -108,7 +109,7 @@ for i in range(T):
     for a in range(30):
         for b in range(30):
             for sensor in all_sensors:
-                prob_detection = max(0.4, 0.9 - distance((a+0.5, b+0.5), (sensor.x, sensor.y))/10)
+                prob_detection = max(0.4, 0.9 - chebyshev((a, b), (sensor.x, sensor.y))/10)
                 # making sure probability remains zero outside the distribution
                 if prob_detection == 0.4:
                     prob_detection = 0
@@ -135,13 +136,15 @@ ax = fig.gca()
 ax.set_xticks(np.arange(0, 31, 1))
 ax.set_yticks(np.arange(0, 31, 1))
 # made sure the points lie inside coordinate axes rather than on coordinate axes
-ax.set_xlim([-0.5, 30.5])
-ax.set_ylim([-0.5, 30.5])
+ax.set_xlim([-0.5, 29.5])
+ax.set_ylim([-0.5, 29.5])
 cmap = colors.ListedColormap(['b', 'g', 'r'])
 scatter_color = [1 if s.measurements[0] else 2 for s in all_sensors]
-scatter_color.insert(0, 0)
+scatter_color.append(0)
 marker = markers.MarkerStyle(marker='s')
 scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap='Greys', edgecolors='k', marker=marker)
+scat2 = plt.scatter([sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x, x], [sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y, y], c=scatter_color,cmap=cmap, s=200, edgecolors='k', marker=marker)
+# scat3 = plt.scatter([x], [y], s=200, c=0, cmap=cmap, edgecolors='k')
 
 
 # Handling how frames are updated in animation.
@@ -155,19 +158,25 @@ def update_plot(i):
             brr.append(b)
             colmap.append(P[i,a,b]*1000)
     
+    sensor_pos_x, sensor_pos_y = [], []
+    sensor_cmap = []
     for s in all_sensors:
-        arr.append(s.x)
-        brr.append(s.y)
+        sensor_pos_x.append(s.x)
+        sensor_pos_y.append(s.y)
         if s.measurements[i]:
-            colmap.append(1)
+            sensor_cmap.append(1)
         else:
-            colmap.append(2)
-    arr.append(robot_bf.movement_history[i][0])
-    brr.append(robot_bf.movement_history[i][1])
-    colmap.append(0)
+            sensor_cmap.append(2)
+    
+    sensor_pos_x.append(robot_bf.movement_history[i][0])
+    sensor_pos_y.append(robot_bf.movement_history[i][1])
+    sensor_cmap.append(0)
+
     scat.set_offsets(np.c_[arr, brr])
     scat.set_array(np.array(colmap))
-    return scat,
+    scat2.set_offsets(np.c_[sensor_pos_x, sensor_pos_y])
+    scat2.set_array(np.array(sensor_cmap))
+    return scat, scat2,
 
 plt.grid()
 ani = animation.FuncAnimation(fig, update_plot, frames=range(len(robot_bf.movement_history)), interval=500, repeat=False, blit=True)

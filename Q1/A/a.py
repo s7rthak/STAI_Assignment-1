@@ -3,10 +3,11 @@ import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.colors as colors
+import matplotlib.markers as markers
 import numpy as np
 
-def distance(a, b):
-    return max(abs(a[0] - b[0]),abs(a[1] - b[1]))
+def chebyshev(a, b):
+    return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
 
 def all_measure(all_sensors, robot_bf):
     for sensor in all_sensors:
@@ -34,7 +35,10 @@ class Sensor:
         self.y = y
         self.measurements = []
     def measure(self, robot_bf):
-        prob_detection = max(0, 0.9 - distance((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
+        prob_detection = max(0.4, 0.9 - chebyshev((robot_bf.x, robot_bf.y), (self.x, self.y))/10)
+        # making sure probability remains zero outside the distribution
+        if prob_detection == 0.4:
+            prob_detection = 0
         measurement = np.random.choice([True, False], 1, p=[prob_detection, 1-prob_detection])[0]
         self.measurements.append(measurement)
 
@@ -71,8 +75,9 @@ sensor_1, sensor_2, sensor_3, sensor_4 = Sensor(8, 15), Sensor(15, 15), Sensor(2
 all_sensors = [sensor_1, sensor_2, sensor_3, sensor_4]
 all_measure(all_sensors, robot_bf)
 
+T = 100
 # Running the simulation.
-for i in range(30):
+for i in range(T):
     robot_bf.next_state(transition_model(robot_bf, motion_model))
     all_measure(all_sensors, robot_bf)   
 
@@ -86,7 +91,12 @@ ax.set_ylim([-0.5, 29.5])
 cmap = colors.ListedColormap(['b', 'g', 'r'])
 scatter_color = [1 if s.measurements[0] else 2 for s in all_sensors]
 scatter_color.insert(0, 0)
-scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap=cmap, edgecolors='k')
+
+P = np.arange(30)
+all_points = np.dstack(np.meshgrid(P, P)).reshape(-1, 2)
+marker = markers.MarkerStyle(marker='s')
+scat2 = plt.scatter(all_points[:, 0], all_points[:, 1], c=np.zeros(900, dtype=int), s=200, cmap='Greys', edgecolors='k', marker=marker)
+scat = plt.scatter([sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x, x], [sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y, y], c=scatter_color,cmap=cmap, s=200, edgecolors='k', marker=marker)
 
 # Handling how frames are updated in animation.
 def update_plot(i):
