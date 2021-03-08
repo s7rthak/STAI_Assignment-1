@@ -92,7 +92,7 @@ all_measure(all_sensors, robot_bf)
 for i in range(T):
     robot_bf.next_state(transition_model(robot_bf, motion_model))
     all_measure(all_sensors, robot_bf)
-    # calculating probability of a state using baye's filter
+    # calculating probability of a state using bayes filter
     P_dash = np.zeros((30,30))
     for a in range(30):
         for b in range(30):
