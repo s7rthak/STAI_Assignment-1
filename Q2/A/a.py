@@ -81,7 +81,10 @@ line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
 scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+line1.set_label('Actual motion')
+line2.set_label('Observed motion')
 plt.grid()
+plt.legend(loc="upper left")
 
 def animate(i):
     line1.set_data(x_motion[:i], y_motion[:i])
