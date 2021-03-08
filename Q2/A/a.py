@@ -57,7 +57,7 @@ init_state = np.vstack((init_location, init_velocity))
 my_airplane = Airplane(init_state)
 my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
 
-T = 50
+T = 200
 delta_t = 0.5
 
 for t in range(T):
@@ -69,15 +69,19 @@ x_motion = [my_airplane.state_history[j][0, 0] for j in range(T)]
 y_motion = [my_airplane.state_history[j][1, 0] for j in range(T)]
 x_obs = [my_airplane.observation[j][0, 0] for j in range(T)]
 y_obs = [my_airplane.observation[j][1, 0] for j in range(T)]
-
+x_min = min(min(x_motion), min(x_obs))
+x_max = max(max(x_motion), max(x_obs))
+y_max = max(max(y_motion), max(y_obs))
+y_min = min(min(y_motion), min(y_obs))
 
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
-ax.set_xlim([0, movement_dimension + T*movement_scale/3])
-ax.set_ylim([0, movement_dimension + T*movement_scale/3])
+ax.set_xlim([x_min-50, x_max+50])
+ax.set_ylim([y_min-50, y_max+50])
 line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
 scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+plt.grid()
 
 def animate(i):
     line1.set_data(x_motion[:i], y_motion[:i])
