@@ -83,8 +83,8 @@ def animate(i):
     line1.set_data(x_motion[:i], y_motion[:i])
     line2.set_data(x_obs[:i], y_obs[:i])
     if i == 0:
-        scat1.set_offsets(np.c_[[x_motion[0]], [y_motion[i-1]]])
-        scat2.set_offsets(np.c_[[x_obs[0]], [y_obs[i-1]]])
+        scat1.set_offsets(np.c_[[x_motion[0]], [y_motion[0]]])
+        scat2.set_offsets(np.c_[[x_obs[0]], [y_obs[0]]])
     else:
         scat1.set_offsets(np.c_[[x_motion[i-1]], [y_motion[i-1]]])
         scat2.set_offsets(np.c_[[x_obs[i-1]], [y_obs[i-1]]])
