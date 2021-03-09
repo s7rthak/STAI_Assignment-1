@@ -68,7 +68,7 @@ def _plot_gaussian(mean, covariance, color='k', zorder=0):
 
     return pat.Ellipse(
         mean, axis[0], axis[1], angle=angle,
-        fill=False, color=color, linewidth=1, zorder=zorder
+        fill=False, color=color, linewidth=1, zorder=zorder, animated=True
     )
 
 U = np.zeros((2, 1))
