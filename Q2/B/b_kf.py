@@ -80,36 +80,12 @@ R[2, 2] = 0.0001
 R[3, 3] = 0.0001
 Q = 10 * np.eye(2, 2)
 
-# movement_dimension = 50
-# movement_scale = 5
-
-# init_location = movement_dimension * np.random.rand(2, 1)
-# init_velocity = movement_scale * np.random.rand(2, 1)
 init_location = 10 * np.ones((2, 1))
 init_velocity = np.ones((2, 1))
 
 init_state = np.vstack((init_location, init_velocity))
 my_airplane = Airplane(init_state)
 my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
-
-
-# def animate(i):
-#     line1.set_data(x_motion[:i], y_motion[:i])
-#     line2.set_data(x_obs[:i], y_obs[:i])
-#     if i == 0:
-#         scat1.set_offsets(np.c_[[x_motion[0]], [y_motion[0]]])
-#         scat2.set_offsets(np.c_[[x_obs[0]], [y_obs[0]]])
-#     else:
-#         scat1.set_offsets(np.c_[[x_motion[i-1]], [y_motion[i-1]]])
-#         scat2.set_offsets(np.c_[[x_obs[i-1]], [y_obs[i-1]]])
-#     return line1, line2, scat1, scat2,
-
-# ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
-# ani.save('a.mp4')
-
-# plt.show()
-
-
 
 T = 20
 delta_t = 1
@@ -141,10 +117,10 @@ ax.set_xticks(np.arange(0, 50, 1))
 ax.set_yticks(np.arange(0, 50, 1))
 ax.set_xlim([0, 50])
 ax.set_ylim([0, 50])
-ell = [_plot_gaussian(mu_0[:, 0], sigma_0)]
+ell = [_plot_gaussian(mu_0[:2, 0], sigma_0)]
 
 for t in range(1, 20):
-    ell.append(_plot_gaussian(Bel[t][0][:, 0], Bel[t][1]))
+    ell.append(_plot_gaussian(Bel[t][0][:2, 0], Bel[t][1]))
 
 e = ell[0]
 ax.add_patch(e)
@@ -152,15 +128,9 @@ line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
 line3, = ax.plot(predicted_state[0, 0, 0], predicted_state[0, 1, 0], color='b')
 
-# P = np.arange(bf_sz)
-# all_points = np.dstack(np.meshgrid(P, P)).reshape(-1, 2)
-# marker = markers.MarkerStyle(marker='s')
-
-# scat3 = plt.scatter(all_points[:, 0], all_points[:, 1], c=Bel[0, :, 0]*1000, s=200, cmap='Greys', edgecolors='k', marker=marker)
 scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
 scat3 = plt.scatter([predicted_state[0, 0, 0]], [predicted_state[0, 1, 0]], c='b', s=50, edgecolors='k')
-# scat4 = plt.scatter([10], [10], c='b', s=200, edgecolors='k', marker=marker)
 
 line1.set_label('Actual motion')
 line2.set_label('Observed motion')
@@ -169,17 +139,6 @@ plt.grid()
 plt.legend(loc="upper left")
 
 def animate(i):
-    # arr = []
-    # brr = []
-    # shade_map = []
-    # for a in range(bf_sz):
-    #     for b in range(bf_sz):
-    #         arr.append(a)
-    #         brr.append(b)
-    #         shade_map.append(Bel[i,a*bf_sz + b,0]*1000)
-
-    # scat3.set_offsets(np.c_[arr, brr])
-    # scat3.set_array(np.array(shade_map))
     line1.set_data(x_motion[:i+1], y_motion[:i+1])
     line2.set_data(x_obs[:i+1], y_obs[:i+1])
     line3.set_data(predicted_state[:i+1, 0, 0], predicted_state[:i+1, 1, 0])
@@ -190,7 +149,6 @@ def animate(i):
     e.set_center(ell[i].center)
     e.set_width(ell[i].width)
     e.set_height(ell[i].height)
-    # scat4.set_offsets(np.c_[[predicted_path[i][0]], [predicted_path[i][1]]])
     return line1, line2, line3, scat1, scat2, scat3, e, 
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
