@@ -169,9 +169,9 @@ plt.grid()
 plt.legend(loc="upper left")
 
 def animate(i):
-    arr = []
-    brr = []
-    shade_map = []
+    # arr = []
+    # brr = []
+    # shade_map = []
     # for a in range(bf_sz):
     #     for b in range(bf_sz):
     #         arr.append(a)
@@ -188,8 +188,8 @@ def animate(i):
     scat3.set_offsets(np.c_[[predicted_state[i, 0, 0]], [predicted_state[i, 1, 0]]])
     e.set_angle(ell[i].angle)
     e.set_center(ell[i].center)
-    e.set_width(ell[i].get_width())
-    e.set_height(ell[i].get_height())
+    e.set_width(ell[i].width)
+    e.set_height(ell[i].height)
     # scat4.set_offsets(np.c_[[predicted_path[i][0]], [predicted_path[i][1]]])
     return line1, line2, line3, scat1, scat2, scat3, e, 
 
