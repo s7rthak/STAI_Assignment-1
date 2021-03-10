@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from numpy.lib.function_base import interp
 import math
 import matplotlib.markers as markers
+import heapq
 
-bf_sz = 30
-sensor_cred = 0.7       # Less is better. Lesser this value, more sure we are about the sensor measurement.
+bf_sz = 40
+sensor_cred = 0.5       # Less is better. Lesser this value, more sure we are about the sensor measurement.
 
 class Airplane:
     def __init__(self, s):
@@ -61,6 +61,65 @@ def bayes_filter(Bel, TM, obs):
     Bel_new = Bel_dash/eta
     return Bel_new
 
+def is_valid(x, y):
+    if x < bf_sz and x >= 0 and y < bf_sz and y >= 0:
+        return True
+    return False
+
+def convert(x, y):
+    return bf_sz*x + y
+
+def add_neighbours(visited, element, pq, P):
+    x, y = element[0], element[1]
+    converged = True
+    if is_valid(x+1, y) and not( (x+1, y) in visited ):
+        heapq.heappush(pq, (-P[convert(x+1, y)], (x+1, y)))
+        visited.add((x+1, y))
+        converged = False
+    if is_valid(x+1, y+1) and not( (x+1, y+1) in visited ):
+        heapq.heappush(pq, (-P[convert(x+1, y+1)], (x+1, y+1)))
+        visited.add((x+1, y+1))
+        converged = False
+    if is_valid(x, y+1) and not( (x, y+1) in visited ):
+        heapq.heappush(pq, (-P[convert(x, y+1)], (x, y+1)))
+        visited.add((x, y+1))
+        converged = False
+    if is_valid(x-1, y+1) and not( (x-1, y+1) in visited ):
+        heapq.heappush(pq, (-P[convert(x-1, y+1)], (x-1, y+1)))
+        visited.add((x-1, y+1))
+        converged = False
+    if is_valid(x-1, y) and not( (x-1, y) in visited ):
+        heapq.heappush(pq, (-P[convert(x-1, y)], (x-1, y)))
+        visited.add((x-1, y))
+        converged = False
+    if is_valid(x-1, y-1) and not( (x-1, y-1) in visited ):
+        heapq.heappush(pq, (-P[convert(x-1, y-1)], (x-1, y-1)))
+        visited.add((x-1, y-1))
+        converged = False
+    if is_valid(x, y-1) and not( (x, y-1) in visited ):
+        heapq.heappush(pq, (-P[convert(x, y-1)], (x, y-1)))
+        visited.add((x, y-1))
+        converged = False
+    if is_valid(x+1, y-1) and not( (x+1, y-1) in visited ):
+        heapq.heappush(pq, (-P[convert(x+1, y-1)], (x+1, y-1)))
+        visited.add((x+1, y-1))
+        converged = False
+    return converged
+
+def predict_uncertainty(mean, P, th):
+    visited = set()
+    visited.add(mean)
+    blanket = []
+    frontier = [(-P[mean[0]*bf_sz + mean[1]], mean)]
+    heapq.heapify(frontier)
+    converged = False
+    prob_sum = 0
+    while not converged and prob_sum < th:
+        new_element = heapq.heappop(frontier)
+        blanket.append(new_element[1])
+        prob_sum += (-new_element[0])
+        converged = add_neighbours(visited, new_element[1], frontier, P)
+    return blanket
 
 
 U = np.zeros((2, 1))
@@ -70,13 +129,8 @@ R[0, 0] = 1
 R[1, 1] = 1
 R[2, 2] = 0.0001
 R[3, 3] = 0.0001
-Q = 10 * np.eye(2, 2)
+Q = 1 * np.eye(2, 2)
 
-# movement_dimension = 50
-# movement_scale = 5
-
-# init_location = movement_dimension * np.random.rand(2, 1)
-# init_velocity = movement_scale * np.random.rand(2, 1)
 init_location = 10 * np.ones((2, 1))
 init_velocity = np.ones((2, 1))
 
@@ -85,25 +139,7 @@ my_airplane = Airplane(init_state)
 my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
 
 
-# def animate(i):
-#     line1.set_data(x_motion[:i], y_motion[:i])
-#     line2.set_data(x_obs[:i], y_obs[:i])
-#     if i == 0:
-#         scat1.set_offsets(np.c_[[x_motion[0]], [y_motion[0]]])
-#         scat2.set_offsets(np.c_[[x_obs[0]], [y_obs[0]]])
-#     else:
-#         scat1.set_offsets(np.c_[[x_motion[i-1]], [y_motion[i-1]]])
-#         scat2.set_offsets(np.c_[[x_obs[i-1]], [y_obs[i-1]]])
-#     return line1, line2, scat1, scat2,
-
-# ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
-# ani.save('a.mp4')
-
-# plt.show()
-
-
-
-T = 20
+T = 30
 delta_t = 1
 
 Bel = np.zeros((T, bf_sz*bf_sz, 1))
@@ -143,15 +179,20 @@ y_motion = [my_airplane.state_history[j][1, 0] for j in range(T)]
 x_obs = [my_airplane.observation[j][0, 0] for j in range(T)]
 y_obs = [my_airplane.observation[j][1, 0] for j in range(T)]
 
-for i in range(1, 20):
+for i in range(1, T):
     Bel[i] = bayes_filter(Bel[i-1], TM, (x_obs[i], y_obs[i]))
 
 predicted_path = []
 
-for i in range(20):
+for i in range(T):
     k = np.argmax(Bel[i])
     x, y = k//bf_sz, k%bf_sz
     predicted_path.append((x, y))
+
+sd1_blanket = []
+
+for t in range(T):
+    sd1_blanket.append(predict_uncertainty(predicted_path[t], Bel[t, :, 0], 0.68))
 
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
 ax.set_xticks(np.arange(0, bf_sz+1, 1))
@@ -169,6 +210,7 @@ scat3 = plt.scatter(all_points[:, 0], all_points[:, 1], c=Bel[0, :, 0]*1000, s=2
 scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
 scat4 = plt.scatter([10], [10], c='b', s=200, edgecolors='k', marker=marker)
+scat5 = plt.scatter([10], [10], c='y', s=200, edgecolors='k', marker=marker)
 
 line1.set_label('Actual motion')
 line2.set_label('Observed motion')
@@ -189,10 +231,11 @@ def animate(i):
     scat3.set_array(np.array(shade_map))
     line1.set_data(x_motion[:i+1], y_motion[:i+1])
     line2.set_data(x_obs[:i+1], y_obs[:i+1])
+    scat5.set_offsets(np.c_[[x[0] for x in sd1_blanket[i]], [x[1] for x in sd1_blanket[i]]])
     scat1.set_offsets(np.c_[[x_motion[i]], [y_motion[i]]])
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat4.set_offsets(np.c_[[predicted_path[i][0]], [predicted_path[i][1]]])
-    return scat3, scat4, scat1, scat2, line1, line2,
+    return scat3, scat5, scat4, scat1, scat2, line1, line2,
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
 ani.save('b_bf.mp4')
