@@ -5,7 +5,7 @@ import math
 import matplotlib.markers as markers
 import heapq
 
-bf_sz = 40
+bf_sz = 50
 sensor_cred = 0.5       # Less is better. Lesser this value, more sure we are about the sensor measurement.
 
 class Airplane:
@@ -206,11 +206,11 @@ P = np.arange(bf_sz)
 all_points = np.dstack(np.meshgrid(P, P)).reshape(-1, 2)
 marker = markers.MarkerStyle(marker='s')
 
-scat3 = plt.scatter(all_points[:, 0], all_points[:, 1], c=Bel[0, :, 0]*1000, s=200, cmap='Greys', edgecolors='k', marker=marker)
+scat3 = plt.scatter(all_points[:, 0], all_points[:, 1], c=Bel[0, :, 0]*1000, s=100, cmap='Greys', edgecolors='k', marker=marker)
 scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
-scat4 = plt.scatter([10], [10], c='b', s=200, edgecolors='k', marker=marker)
-scat5 = plt.scatter([10], [10], c='y', s=200, edgecolors='k', marker=marker)
+scat4 = plt.scatter([10], [10], c='b', s=100, edgecolors='k', marker=marker)
+scat5 = plt.scatter([10], [10], c='y', s=100, edgecolors='k', marker=marker)
 
 line1.set_label('Actual motion')
 line2.set_label('Observed motion')
