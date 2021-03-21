@@ -321,6 +321,7 @@ marker = markers.MarkerStyle(marker='s')
 scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap='Greys', edgecolors='k', marker=marker)
 scat2 = plt.scatter([sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x, x], [sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y, y], c=scatter_color,cmap=cmap, s=200, edgecolors='k', marker=marker)
 scat3 = plt.scatter([], [], c=[],cmap=cmap2, s=200, edgecolors='k', marker=marker)
+scat4 = plt.scatter([], [], c='m', s=200, edgecolors='k', marker=marker)
 
 
 # Handling how frames are updated in animation.
@@ -369,7 +370,8 @@ def update_plot(i):
     scat2.set_array(np.array(sensor_cmap))
     scat3.set_offsets(np.c_[bestout_x, bestout_y])
     scat3.set_array(np.array(colmap2))
-    return scat, scat3, scat2, 
+    scat4.set_offsets(np.c_[[bestout_x[i]], [bestout_y[i]]])
+    return scat, scat3, scat2, scat4,
 
 plt.grid()
 ani = animation.FuncAnimation(fig, update_plot, frames=range(len(robot_bf.movement_history)), interval=500, repeat=False, blit=True)
