@@ -6,7 +6,7 @@ import matplotlib.colors as colors
 import numpy as np
 import matplotlib.markers as markers
 
-T=50
+T=30
 
 # initializing the probability matrix for bayes filter P[i,j,k]
 # i:time j:x-axis location k:y-axis location
@@ -148,12 +148,22 @@ for i in range(T):
                     P_bwd[i+1,a,b] += motion_model[action] * P_bwd[i,a-1,b]
             eta += P_bwd[i+1,a,b]
     
-    
+
+for i in range(min(30,T)):    
     for a in range(30):
         for b in range(30):
             P_bwd[i+1,a,b] = P_bwd[i+1,a,b]/eta
             # unsetting bias for all states excluding end ones
             P_bwd[i,a,b] = 0
+
+if T>30:
+    for a in range(30):
+        for b in range(30):
+            P_bwd[T,a,b] = P_bwd[30,a,b]/eta
+            # unsetting bias for all states excluding end ones
+            P_bwd[15,a,b] = 0
+
+
 
 # starting backpropagation algorithm
 for i in range(T-1, -1, -1):
@@ -161,42 +171,42 @@ for i in range(T-1, -1, -1):
     for a in range(30):
         for b in range(30):
             for action in motion_model:
-                if action == 'up' and b>0:
+                if action == 'up' and b<29:
                     for sensor in all_sensors:
                         prob_detection = max(0.4, 0.9 - chebyshev((a, b), (sensor.x, sensor.y))/10)
                         if prob_detection == 0.4:
-                            prob_detection = 0
-                        if sensor.measurements[T-i-1]:
-                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b] * motion_model[action]
+                            prob_detection = 0.0
+                        if sensor.measurements[i]:
+                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b+1] * motion_model[action]
                         else:
-                            P_bwd[i,a,b] += (1-prob_detection) * P_bwd[i+1,a,b] * motion_model[action]
-                if action == 'down' and b<29:
+                            P_bwd[i,a,b] += 1/900 * P_bwd[i+1,a,b+1] * motion_model[action]
+                if action == 'down' and b>0:
                     for sensor in all_sensors:
                         prob_detection = max(0.4, 0.9 - chebyshev((a, b), (sensor.x, sensor.y))/10)
                         if prob_detection == 0.4:
-                            prob_detection = 0
-                        if sensor.measurements[T-i-1]:
-                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b] * motion_model[action]
+                            prob_detection = 0.0
+                        if sensor.measurements[i]:
+                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b-1] * motion_model[action]
                         else:
-                            P_bwd[i,a,b] += (1-prob_detection) * P_bwd[i+1,a,b] * motion_model[action]
-                if action == 'left' and a<29:
+                            P_bwd[i,a,b] += 1/900 * P_bwd[i+1,a,b-1] * motion_model[action]
+                if action == 'left' and a>0:
                     for sensor in all_sensors:
                         prob_detection = max(0.4, 0.9 - chebyshev((a, b), (sensor.x, sensor.y))/10)
                         if prob_detection == 0.4:
-                            prob_detection = 0
-                        if sensor.measurements[T-i-1]:
-                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b] * motion_model[action]
+                            prob_detection = 0.0
+                        if sensor.measurements[i]:
+                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a-1,b] * motion_model[action]
                         else:
-                            P_bwd[i,a,b] += (1-prob_detection) * P_bwd[i+1,a,b] * motion_model[action]
-                if action == 'right' and a>0:
+                            P_bwd[i,a,b] += 1/900 * P_bwd[i+1,a-1,b] * motion_model[action]
+                if action == 'right' and a<29:
                     for sensor in all_sensors:
                         prob_detection = max(0.4, 0.9 - chebyshev((a, b), (sensor.x, sensor.y))/10)
                         if prob_detection == 0.4:
-                            prob_detection = 0
-                        if sensor.measurements[T-i-1]:
-                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a,b] * motion_model[action]
+                            prob_detection = 0.0
+                        if sensor.measurements[i]:
+                            P_bwd[i,a,b] += prob_detection * P_bwd[i+1,a+1,b] * motion_model[action]
                         else:
-                            P_bwd[i,a,b] += (1-prob_detection) * P_bwd[i+1,a,b] * motion_model[action]
+                            P_bwd[i,a,b] += 1/900 * P_bwd[i+1,a+1,b] * motion_model[action]
             eta += P_bwd[i,a,b]
     
     for a in range(30):
