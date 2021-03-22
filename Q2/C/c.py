@@ -55,60 +55,24 @@ def kalman_filter(mu, sigma, z, A, U, B, R, C, Q):
     sigma_t = (np.eye(4, 4) - K_t.dot(C)).dot(sigma_t_dash)
     return mu_t, sigma_t
 
-# U = np.zeros((2, 1))
-def U(Omega, t):
-    return np.array([np.sin(Omega*t * np.pi / 180.), np.cos(Omega*t * np.pi / 180.)]).reshape((2, 1))
+def _plot_gaussian(mean, covariance, ax, color='k', zorder=0):
+    """Plots the mean and 2-std ellipse of a given Gaussian"""
+    # plt.plot(mean[0], mean[1], color[0] + ".", zorder=zorder)
 
-C = np.eye(2, 4)
-R = np.zeros((4, 4))
-R[0, 0] = 1
-R[1, 1] = 1
-R[2, 2] = 0.0001
-R[3, 3] = 0.0001
-Q = 10 * np.eye(2, 2)
-Omega = 30
+    if covariance.ndim == 1:
+        covariance = np.diag(covariance)
 
-init_location = 10 * np.ones((2, 1))
-init_velocity = np.ones((2, 1))
+    radius = np.sqrt(5.991)
+    eigvals, eigvecs = np.linalg.eig(covariance)
+    axis = np.sqrt(eigvals) * radius
+    slope = eigvecs[1][0] / eigvecs[1][1]
+    angle = 180.0 * np.arctan(slope) / np.pi
 
-init_state = np.vstack((init_location, init_velocity))
-my_airplane = Airplane(init_state)
-my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
-
-T = 20
-delta_t = 1
-
-for t in range(T):
-    S = motion_model(my_airplane.s, A(delta_t), B(delta_t), U(Omega, t), np.random.multivariate_normal(np.zeros(4,), R).reshape(4, 1))
-    my_airplane.transition(S)
-    my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
-
-x_motion = [my_airplane.state_history[j][0, 0] for j in range(T)]
-y_motion = [my_airplane.state_history[j][1, 0] for j in range(T)]
-x_obs = [my_airplane.observation[j][0, 0] for j in range(T)]
-y_obs = [my_airplane.observation[j][1, 0] for j in range(T)]
-x_min = min(min(x_motion), min(x_obs))
-x_max = max(max(x_motion), max(x_obs))
-y_max = max(max(y_motion), max(y_obs))
-y_min = min(min(y_motion), min(y_obs))
-
-mu_0 = init_state
-sigma_0 = 10000 * np.eye(4, 4)
-
-Bel = [(mu_0, sigma_0)]
-
-for t in range(T):
-    mu, sigma = kalman_filter(Bel[t][0], Bel[t][1], np.array([[x_obs[t]], [y_obs[t]]]), A(delta_t), U(Omega, t), B(delta_t), R, C, Q)
-    Bel.append((mu, sigma))
-
-predicted_state = [Bel[i][0] for i in range(len(Bel))]
-predicted_state = np.array(predicted_state)
-
-fig, ax = plt.subplots(1, 1, figsize = (10, 10))
-ax.set_xticks(np.arange(x_min-10, x_max+10, 10))
-ax.set_yticks(np.arange(y_min-10, y_max+10, 10))
-ax.set_xlim([x_min-10, x_max+10])
-ax.set_ylim([y_min-10, y_max+10])
+    ell = pat.Ellipse(
+        mean, axis[0], axis[1], angle=angle,
+        fill=False, color=color, linewidth=1, zorder=zorder, animated=True
+    )
+    return ax.add_patch(ell)
 
 # -------------------------------------------------------------------------------------------------------------------
 # taken from https://github.com/yugaro/machine-learning/tree/444db199d5f66d63c4bb60cb367f7b774c5cef7e/Bayesian-CBF
@@ -160,8 +124,59 @@ def demo_plot_ellipse(V, mean, ax):
 
 # ------------------------------------------------------------------------------------------------------------------
 
+U = np.zeros((2, 1))
+C = np.eye(2, 4)
+R = np.zeros((4, 4))
+R[0, 0] = 1
+R[1, 1] = 1
+R[2, 2] = 0.0001
+R[3, 3] = 0.0001
+Q = 10 * np.eye(2, 2)
 
+init_location = 10 * np.ones((2, 1))
+init_velocity = np.ones((2, 1))
 
+init_state = np.vstack((init_location, init_velocity))
+my_airplane = Airplane(init_state)
+my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
+
+T = 20
+delta_t = 1
+
+for t in range(T):
+    S = motion_model(my_airplane.s, A(delta_t), B(delta_t), U, np.random.multivariate_normal(np.zeros(4,), R).reshape(4, 1))
+    my_airplane.transition(S)
+    my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
+
+x_motion = [my_airplane.state_history[j][0, 0] for j in range(T)]
+y_motion = [my_airplane.state_history[j][1, 0] for j in range(T)]
+x_obs = [my_airplane.observation[j][0, 0] for j in range(T)]
+y_obs = [my_airplane.observation[j][1, 0] for j in range(T)]
+
+mu_0 = init_state
+sigma_0 = 0.0001 * np.eye(4, 4)
+
+Bel = [(mu_0, sigma_0)]
+
+for t in range(T):
+    mu, sigma = kalman_filter(Bel[t][0], Bel[t][1], np.array([[x_obs[t]], [y_obs[t]]]), A(delta_t), U, B(delta_t), R, C, Q)
+    Bel.append((mu, sigma))
+
+predicted_state = [Bel[i][0] for i in range(len(Bel))]
+predicted_state = np.array(predicted_state)
+
+fig, ax = plt.subplots(1, 1, figsize = (10, 10))
+ax.set_xticks(np.arange(0, 50, 1))
+ax.set_yticks(np.arange(0, 50, 1))
+ax.set_xlim([0, 50])
+ax.set_ylim([0, 50])
+# ell = [_plot_gaussian(mu_0[:2, 0], sigma_0)]
+
+# for t in range(1, 20):
+#     ell.append(_plot_gaussian(Bel[t][0][:2, 0], Bel[t][1]))
+
+# e = ell[0]
+# ax.add_patch(e)
 line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
 line3, = ax.plot(predicted_state[0, 0, 0], predicted_state[0, 1, 0], color='b')
@@ -190,9 +205,9 @@ def animate(i):
     scat1.set_offsets(np.c_[[x_motion[i]], [y_motion[i]]])
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat3.set_offsets(np.c_[[predicted_state[i, 0, 0]], [predicted_state[i, 1, 0]]])
-    return line1, line2, line3, scat1, scat2, scat3,
+    return line1, line2, line3, scat1, scat2, scat3, 
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=False)
-ani.save('f.mp4')
+ani.save('c.mp4')
 
 plt.show()

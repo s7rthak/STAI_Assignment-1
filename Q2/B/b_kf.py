@@ -53,7 +53,7 @@ def kalman_filter(mu, sigma, z, A, U, B, R, C, Q):
     sigma_t = (np.eye(4, 4) - K_t.dot(C)).dot(sigma_t_dash)
     return mu_t, sigma_t
 
-def _plot_gaussian(mean, covariance, color='k', zorder=0):
+def _plot_gaussian(mean, covariance, ax, color='k', zorder=0):
     """Plots the mean and 2-std ellipse of a given Gaussian"""
     # plt.plot(mean[0], mean[1], color[0] + ".", zorder=zorder)
 
@@ -66,10 +66,11 @@ def _plot_gaussian(mean, covariance, color='k', zorder=0):
     slope = eigvecs[1][0] / eigvecs[1][1]
     angle = 180.0 * np.arctan(slope) / np.pi
 
-    return pat.Ellipse(
+    ell = pat.Ellipse(
         mean, axis[0], axis[1], angle=angle,
         fill=False, color=color, linewidth=1, zorder=zorder, animated=True
     )
+    return ax.add_patch(ell)
 
 U = np.zeros((2, 1))
 C = np.eye(2, 4)
@@ -117,13 +118,13 @@ ax.set_xticks(np.arange(0, 50, 1))
 ax.set_yticks(np.arange(0, 50, 1))
 ax.set_xlim([0, 50])
 ax.set_ylim([0, 50])
-ell = [_plot_gaussian(mu_0[:2, 0], sigma_0)]
+# ell = [_plot_gaussian(mu_0[:2, 0], sigma_0)]
 
-for t in range(1, 20):
-    ell.append(_plot_gaussian(Bel[t][0][:2, 0], Bel[t][1]))
+# for t in range(1, 20):
+#     ell.append(_plot_gaussian(Bel[t][0][:2, 0], Bel[t][1]))
 
-e = ell[0]
-ax.add_patch(e)
+# e = ell[0]
+# ax.add_patch(e)
 line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
 line3, = ax.plot(predicted_state[0, 0, 0], predicted_state[0, 1, 0], color='b')
@@ -145,11 +146,8 @@ def animate(i):
     scat1.set_offsets(np.c_[[x_motion[i]], [y_motion[i]]])
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat3.set_offsets(np.c_[[predicted_state[i, 0, 0]], [predicted_state[i, 1, 0]]])
-    e.set_angle(ell[i].angle)
-    e.set_center(ell[i].center)
-    e.set_width(ell[i].width)
-    e.set_height(ell[i].height)
-    return line1, line2, line3, scat1, scat2, scat3, e, 
+    # _plot_gaussian(Bel[i][0][:2, 0], Bel[i][1], ax)
+    return line1, line2, line3, scat1, scat2, scat3, 
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
 ani.save('b_kf.mp4')
