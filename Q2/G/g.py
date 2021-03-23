@@ -70,7 +70,7 @@ R[0, 0] = 1
 R[1, 1] = 1
 R[2, 2] = 0.0001
 R[3, 3] = 0.0001
-Q = 10 * np.eye(2, 2)
+Q = 100 * np.eye(2, 2)
 Omega = 30
 
 init_location = 10 * np.ones((2, 1))
@@ -102,7 +102,7 @@ y_max = max(max(y_motion), max(y_obs))
 y_min = min(min(y_motion), min(y_obs))
 
 mu_0 = init_state
-sigma_0 = 10000 * np.eye(4, 4)
+sigma_0 = 100 * np.eye(4, 4)
 
 Bel = [(mu_0, sigma_0)]
 
@@ -130,10 +130,10 @@ predicted_state = [Bel[i][0] for i in range(len(Bel))]
 predicted_state = np.array(predicted_state)
 
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
-ax.set_xticks(np.arange(x_min-10, x_max+10, 10))
-ax.set_yticks(np.arange(y_min-10, y_max+10, 10))
-ax.set_xlim([x_min-10, x_max+10])
-ax.set_ylim([y_min-10, y_max+10])
+ax.set_xticks(np.arange(-20, 200, 20))
+ax.set_yticks(np.arange(-20, 200, 20))
+ax.set_xlim([-20, 200])
+ax.set_ylim([-20, 200])
 
 # -------------------------------------------------------------------------------------------------------------------
 # taken from https://github.com/yugaro/machine-learning/tree/444db199d5f66d63c4bb60cb367f7b774c5cef7e/Bayesian-CBF
@@ -187,12 +187,12 @@ def demo_plot_ellipse(V, mean, ax):
 
 
 
-line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
+line1, = ax.plot(x_motion, y_motion, color='g')
 line3, = ax.plot(predicted_state[0, 0, 0], predicted_state[0, 1, 0], color='b')
 
-scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat3 = plt.scatter([predicted_state[0, 0, 0]], [predicted_state[0, 1, 0]], c='b', s=50, edgecolors='k')
 
 line1.set_label('Actual motion')
@@ -215,7 +215,7 @@ def animate(i):
     scat1.set_offsets(np.c_[[x_motion[i]], [y_motion[i]]])
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat3.set_offsets(np.c_[[predicted_state[i, 0, 0]], [predicted_state[i, 1, 0]]])
-    return line1, line2, line3, scat1, scat2, scat3,
+    return line2, line1, line3, scat2, scat1, scat3,
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=False)
 ani.save('g.mp4')

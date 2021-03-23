@@ -6,7 +6,7 @@ import matplotlib.markers as markers
 import heapq
 
 bf_sz = 50
-sensor_cred = 0.5       # Less is better. Lesser this value, more sure we are about the sensor measurement.
+sensor_cred = 0.7       # Less is better. Lesser this value, more sure we are about the sensor measurement.
 
 class Airplane:
     def __init__(self, s):
@@ -199,16 +199,16 @@ ax.set_xticks(np.arange(0, bf_sz+1, 1))
 ax.set_yticks(np.arange(0, bf_sz+1, 1))
 ax.set_xlim([-0.5, bf_sz-0.5])
 ax.set_ylim([-0.5, bf_sz-0.5])
-line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
+line1, = ax.plot(x_motion, y_motion, color='g')
 
 P = np.arange(bf_sz)
 all_points = np.dstack(np.meshgrid(P, P)).reshape(-1, 2)
 marker = markers.MarkerStyle(marker='s')
 
 scat3 = plt.scatter(all_points[:, 0], all_points[:, 1], c=Bel[0, :, 0]*1000, s=100, cmap='Greys', edgecolors='k', marker=marker)
-scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat4 = plt.scatter([10], [10], c='b', s=100, edgecolors='k', marker=marker)
 scat5 = plt.scatter([10], [10], c='y', s=100, edgecolors='k', marker=marker)
 
@@ -235,7 +235,7 @@ def animate(i):
     scat1.set_offsets(np.c_[[x_motion[i]], [y_motion[i]]])
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat4.set_offsets(np.c_[[predicted_path[i][0]], [predicted_path[i][1]]])
-    return scat3, scat5, scat4, scat1, scat2, line1, line2,
+    return scat3, scat5, scat4, scat2, scat1, line2, line1,
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
 ani.save('b_bf.mp4')

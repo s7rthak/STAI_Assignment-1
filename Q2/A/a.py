@@ -45,7 +45,7 @@ R[0, 0] = 1
 R[1, 1] = 1
 R[2, 2] = 0.0001
 R[3, 3] = 0.0001
-Q = 10 * np.eye(2, 2)
+Q = 100 * np.eye(2, 2)
 
 movement_dimension = 50
 movement_scale = 5
@@ -77,10 +77,10 @@ y_min = min(min(y_motion), min(y_obs))
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
 ax.set_xlim([x_min-50, x_max+50])
 ax.set_ylim([y_min-50, y_max+50])
-line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
-scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
+line1, = ax.plot(x_motion, y_motion, color='g')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 line1.set_label('Actual motion')
 line2.set_label('Observed motion')
 plt.grid()
@@ -95,7 +95,7 @@ def animate(i):
     else:
         scat1.set_offsets(np.c_[[x_motion[i-1]], [y_motion[i-1]]])
         scat2.set_offsets(np.c_[[x_obs[i-1]], [y_obs[i-1]]])
-    return line1, line2, scat1, scat2,
+    return line2, line1, scat2, scat1,
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
 ani.save('a.mp4')

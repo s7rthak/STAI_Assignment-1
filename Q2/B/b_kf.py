@@ -79,7 +79,7 @@ R[0, 0] = 1
 R[1, 1] = 1
 R[2, 2] = 0.0001
 R[3, 3] = 0.0001
-Q = 10 * np.eye(2, 2)
+Q = 100 * np.eye(2, 2)
 
 init_location = 10 * np.ones((2, 1))
 init_velocity = np.ones((2, 1))
@@ -88,7 +88,7 @@ init_state = np.vstack((init_location, init_velocity))
 my_airplane = Airplane(init_state)
 my_airplane.observed(observation_model(my_airplane.s, C, np.random.multivariate_normal(np.zeros(2,), Q).reshape(2, 1)))
 
-T = 20
+T = 50
 delta_t = 1
 
 for t in range(T):
@@ -114,10 +114,10 @@ predicted_state = [Bel[i][0] for i in range(len(Bel))]
 predicted_state = np.array(predicted_state)
 
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
-ax.set_xticks(np.arange(0, 50, 1))
-ax.set_yticks(np.arange(0, 50, 1))
-ax.set_xlim([0, 50])
-ax.set_ylim([0, 50])
+ax.set_xticks(np.arange(-20, 140, 20))
+ax.set_yticks(np.arange(-20, 140, 20))
+ax.set_xlim([-20, 140])
+ax.set_ylim([-20, 140])
 # ell = [_plot_gaussian(mu_0[:2, 0], sigma_0)]
 
 # for t in range(1, 20):
@@ -125,12 +125,12 @@ ax.set_ylim([0, 50])
 
 # e = ell[0]
 # ax.add_patch(e)
-line1, = ax.plot(x_motion, y_motion, color='g')
 line2, = ax.plot(x_obs, y_obs, color='r')
+line1, = ax.plot(x_motion, y_motion, color='g')
 line3, = ax.plot(predicted_state[0, 0, 0], predicted_state[0, 1, 0], color='b')
 
-scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat2 = plt.scatter([x_obs[0]], [y_obs[0]], c='r', s=50, edgecolors='k')
+scat1 = plt.scatter([x_motion[0]], [y_motion[0]], c='g', s=50, edgecolors='k')
 scat3 = plt.scatter([predicted_state[0, 0, 0]], [predicted_state[0, 1, 0]], c='b', s=50, edgecolors='k')
 
 line1.set_label('Actual motion')
@@ -147,7 +147,7 @@ def animate(i):
     scat2.set_offsets(np.c_[[x_obs[i]], [y_obs[i]]])
     scat3.set_offsets(np.c_[[predicted_state[i, 0, 0]], [predicted_state[i, 1, 0]]])
     # _plot_gaussian(Bel[i][0][:2, 0], Bel[i][1], ax)
-    return line1, line2, line3, scat1, scat2, scat3, 
+    return line2, line1, line3, scat2, scat1, scat3, 
 
 ani = animation.FuncAnimation(fig, animate, T, interval=delta_t * 1000, blit=True)
 ani.save('b_kf.mp4')
