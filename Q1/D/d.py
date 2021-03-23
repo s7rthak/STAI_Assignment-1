@@ -393,7 +393,8 @@ _X = np.arange(len(X))
 plt.bar(_X - 0.2, best_b, 0.4)
 plt.bar(_X + 0.2, best_c, 0.4)
 plt.xticks(_X, X) # set labels manually
-plt.show()
+plt.legend(['part b', 'part c'])
+plt.savefig('d.png')
 
 # Simulating the robot motion through grid motion.
 fig = plt.figure(num=2, figsize=(10, 10))
