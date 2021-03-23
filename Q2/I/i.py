@@ -1,3 +1,4 @@
+
 from matplotlib import colors
 import numpy as np
 import matplotlib.pyplot as plt
@@ -254,6 +255,7 @@ ax.set_xticks(np.arange(x_min_f-10, x_max_f+10, 10))
 ax.set_yticks(np.arange(y_min_f-10, y_max_f+10, 10))
 ax.set_xlim([x_min_f-10, x_max_f+10])
 ax.set_ylim([y_min_f-10, y_max_f+10])
+marker = markers.MarkerStyle(marker='s')
 
 line1, = ax.plot(x_motion_a, y_motion_a, color='g')
 line2, = ax.plot(x_obs_a, y_obs_a, color='r')
@@ -267,11 +269,11 @@ line7, = ax.plot(x_afterassociative_a, y_afterassociative_a, color = 'c')
 line8, = ax.plot(x_afterassociative_b, y_afterassociative_b, color = 'c')
 
 scat1 = plt.scatter([x_motion_a[0]], [y_motion_a[0]], c='g', s=50, edgecolors='k')
-scat2 = plt.scatter([x_obs_a[0]], [y_obs_a[0]], c='r', s=50, edgecolors='k')
+scat2 = plt.scatter([x_obs_a[0]], [y_obs_a[0]], c='r', s=50, edgecolors='k', marker=marker)
 scat3 = plt.scatter([predicted_state_a[0, 0, 0]], [predicted_state_a[0, 1, 0]], c='b', s=50, edgecolors='k')
 
 scat4 = plt.scatter([x_motion_b[0]], [y_motion_b[0]], c='g', s=50, edgecolors='k')
-scat5 = plt.scatter([x_obs_b[0]], [y_obs_b[0]], c='r', s=50, edgecolors='k')
+scat5 = plt.scatter([x_obs_b[0]], [y_obs_b[0]], c='r', s=50, edgecolors='k', marker = marker)
 scat6 = plt.scatter([predicted_state_b[0, 0, 0]], [predicted_state_b[0, 1, 0]], c='b', s=50, edgecolors='k')
 
 scat7 = plt.scatter([x_afterassociative_a[0]], [y_afterassociative_a[0]], c='c', s=50 , edgecolors='k')
