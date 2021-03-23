@@ -44,6 +44,9 @@ def observation_model(S, C, delta):
 def chebyshev(a, b):
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
 
+def euclidean(a, b):
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
 def kalman_filter(mu, sigma, z, A, U, B, R, C, Q):
     mu_t_dash = A.dot(mu) + B.dot(U)
     sigma_t_dash = A.dot(sigma).dot(A.T) + R
@@ -102,6 +105,19 @@ for t in range(T):
 predicted_state = [Bel[i][0] for i in range(len(Bel))]
 predicted_state = np.array(predicted_state)
 
+# Bar graph for euclidean error
+fig2 = plt.figure(figsize = (10, 10))
+euclidean_error = [euclidean((x_motion[i], y_motion[i]), (predicted_state[i, 0, 0], predicted_state[i, 1, 0])) for i in range(len(x_motion))]
+time_stamps = [i*delta_t for i in range(len(x_motion))]
+plt.bar(time_stamps, euclidean_error)
+plt.xticks(np.arange(0, T, delta_t))
+plt.xlabel("Time stamps")
+plt.ylabel("Euclidean error between true and estimated paths")
+plt.title("Variation of euclidean error with respect to time")
+
+plt.savefig('d.png', bbox_inches='tight')
+
+# Animation code
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
 ax.set_xticks(np.arange(x_min-10, x_max+10, 10))
 ax.set_yticks(np.arange(y_min-10, y_max+10, 10))
