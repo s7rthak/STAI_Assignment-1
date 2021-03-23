@@ -78,6 +78,9 @@ def transition_model(robot_bf, motion_model):
     movement_direction = random.choices(choices, action_weights, k=1)[0]
     return movement_direction
 
+def random_sample(arr: np.array, size: int = 1) -> np.array:
+    return arr[np.random.choice(len(arr), size=size, replace=False)]
+
 # Robot motion model initialisation.
 motion_model = { 'up': 0.4, 'down': 0.1, 'left': 0.2, 'right': 0.3 }
 x, y = random.randrange(30), random.randrange(30)
@@ -253,13 +256,40 @@ marker = markers.MarkerStyle(marker='s')
 scat = plt.scatter([x, sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x], [y, sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y], c=scatter_color, s=200, cmap='Greys', edgecolors='k', marker=marker)
 scat2 = plt.scatter([sensor_1.x, sensor_2.x, sensor_3.x, sensor_4.x, x], [sensor_1.y, sensor_2.y, sensor_3.y, sensor_4.y, y], c=scatter_color,cmap=cmap, s=200, edgecolors='k', marker=marker)
 # scat3 = plt.scatter([x], [y], s=200, c=0, cmap=cmap, edgecolors='k')
+scat4 = plt.scatter([], [], c='m', s=200, edgecolors='k', marker=marker)
+
+global last_best
+last_best = (-1,-1)
+
 
 
 # Handling how frames are updated in animation.
 def update_plot(i):
+    global last_best
     arr = []
     brr = []
     colmap = []
+    # finding point with maximum probablity
+    result = np.where(P[i,:,:] == np.amax(P[i,:,:]))
+    list_of_coordinates = np.array(list(zip(result[0], result[1])))
+    minval = 3000
+    # print(last_best)
+    if last_best == (-1,-1):
+        last_best = (random_sample(list_of_coordinates)[0,0],random_sample(list_of_coordinates)[0,1]) 
+    else:
+        current_best = random_sample(list_of_coordinates)
+        for coordinates in list_of_coordinates:
+            a,b = last_best
+            c,d = coordinates
+            val = np.linalg.norm([d-b,c-a])
+            if val < minval:
+                minval = val
+                current_best = (c,d)
+        last_best = current_best
+    
+    # print(last_best)
+    a_est, b_est = last_best
+    
     for a in range(30):
         for b in range(30):
             arr.append(a)
@@ -284,7 +314,8 @@ def update_plot(i):
     scat.set_array(np.array(colmap))
     scat2.set_offsets(np.c_[sensor_pos_x, sensor_pos_y])
     scat2.set_array(np.array(sensor_cmap))
-    return scat, scat2,
+    scat4.set_offsets(np.c_[[a_est], [b_est]])
+    return scat, scat2, scat4,
 
 plt.grid()
 ani = animation.FuncAnimation(fig, update_plot, frames=range(len(robot_bf.movement_history)), interval=500, repeat=False, blit=True)
