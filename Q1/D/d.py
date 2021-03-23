@@ -374,11 +374,11 @@ for i in range(T,-1,-1):
 # calculating data for graphs
 best_b = []
 for  i in range(len(bestpath_y_b)):
-    best_b.append(np.linalg.norm([bestpath_x_b[i]-robot_bf.movement_history[T-i][0],bestpath_y_b[i]-robot_bf.movement_history[T-i][1]]))
+    best_b.append(abs(bestpath_x_b[i]-robot_bf.movement_history[T-i][0]) + abs(bestpath_y_b[i]-robot_bf.movement_history[T-i][1]))
 
 best_c = []
 for  i in range(len(bestpath_y_c)):
-    best_c.append(np.linalg.norm([bestpath_x_c[i]-robot_bf.movement_history[T-i][0],bestpath_y_c[i]-robot_bf.movement_history[T-i][1]]))
+    best_c.append(abs(bestpath_x_c[i]-robot_bf.movement_history[T-i][0]) + abs(bestpath_y_c[i]-robot_bf.movement_history[T-i][1]))
 
 X = []
 for i in range(len(bestpath_x_b)):
