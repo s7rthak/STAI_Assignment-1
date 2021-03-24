@@ -102,7 +102,7 @@ y_max = max(max(y_motion), max(y_obs))
 y_min = min(min(y_motion), min(y_obs))
 
 mu_0 = init_state
-sigma_0 = 100 * np.eye(4, 4)
+sigma_0 = 0.0001 * np.eye(4, 4)
 
 Bel = [(mu_0, sigma_0)]
 

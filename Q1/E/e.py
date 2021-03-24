@@ -222,7 +222,7 @@ def update_plot(i):
         for s in all_sensors:
             sensor_pos_x.append(s.x)
             sensor_pos_y.append(s.y)
-            sensor_cmap.append(1)
+            sensor_cmap.append(2)
             
         scat.set_offsets(np.c_[arr, brr])
         scat.set_array(np.array(colmap))

@@ -72,7 +72,7 @@ R_a[0, 0] = 1
 R_a[1, 1] = 1
 R_a[2, 2] = 0.0001
 R_a[3, 3] = 0.0001
-Q_a = 10 * np.eye(2, 2)
+Q_a = 100 * np.eye(2, 2)
 Omega_a = 30
 
 
@@ -82,13 +82,13 @@ R_b[0, 0] = 1
 R_b[1, 1] = 1
 R_b[2, 2] = 0.0001
 R_b[3, 3] = 0.0001
-Q_b = 10 * np.eye(2, 2)
+Q_b = 100 * np.eye(2, 2)
 Omega_b = 30
 
 init_location_a = 10 * np.ones((2, 1))
 init_velocity_a = np.ones((2, 1))
 
-init_location_b = 10 * np.ones((2,1))
+init_location_b = 50 * np.ones((2,1)) 
 init_velocity_b = np.ones((2, 1))
 
 init_state_a = np.vstack((init_location_a, init_velocity_a))
@@ -115,7 +115,7 @@ for i in range(2):
         arrobs.append(observations_a)
 observation_table.append(arrobs)
 # print(obs)
-T = 20
+T = 50
 delta_t = 1
 
 for t in range(T):
@@ -164,13 +164,13 @@ y_min_f = min(y_min_a, y_min_b)
 y_max_f = max(y_max_a, y_max_b)
 
 mu_0_a = init_state_a
-sigma_0_a = 0.01 * np.eye(4, 4)
+sigma_0_a = 0.0001 * np.eye(4, 4)
 
 Bel_a = [(mu_0_a, sigma_0_a)]
 
 
 mu_0_b = init_state_b
-sigma_0_b = 0.01 * np.eye(4, 4)
+sigma_0_b = 0.0001 * np.eye(4, 4)
 
 Bel_b = [(mu_0_b, sigma_0_b)]
 
@@ -251,10 +251,10 @@ predicted_state_b = [Bel_b[i][0] for i in range(len(Bel_b))]
 predicted_state_b = np.array(predicted_state_b)
 
 fig, ax = plt.subplots(1, 1, figsize = (10, 10))
-ax.set_xticks(np.arange(x_min_f-10, x_max_f+10, 10))
-ax.set_yticks(np.arange(y_min_f-10, y_max_f+10, 10))
-ax.set_xlim([x_min_f-10, x_max_f+10])
-ax.set_ylim([y_min_f-10, y_max_f+10])
+ax.set_xticks(np.arange(-20, 240, 20))
+ax.set_yticks(np.arange(-20, 240, 20))
+ax.set_xlim([-20, 240])
+ax.set_ylim([-20, 240])
 marker = markers.MarkerStyle(marker='s')
 
 line1, = ax.plot(x_motion_a, y_motion_a, color='g')
@@ -269,15 +269,15 @@ line7, = ax.plot(x_afterassociative_a, y_afterassociative_a, color = 'c')
 line8, = ax.plot(x_afterassociative_b, y_afterassociative_b, color = 'c')
 
 scat1 = plt.scatter([x_motion_a[0]], [y_motion_a[0]], c='g', s=50, edgecolors='k')
-scat2 = plt.scatter([x_obs_a[0]], [y_obs_a[0]], c='r', s=50, edgecolors='k', marker=marker)
+scat2 = plt.scatter([x_obs_a[0]], [y_obs_a[0]], c='r', s=50, edgecolors='k')
 scat3 = plt.scatter([predicted_state_a[0, 0, 0]], [predicted_state_a[0, 1, 0]], c='b', s=50, edgecolors='k')
 
-scat4 = plt.scatter([x_motion_b[0]], [y_motion_b[0]], c='g', s=50, edgecolors='k')
-scat5 = plt.scatter([x_obs_b[0]], [y_obs_b[0]], c='r', s=50, edgecolors='k', marker = marker)
-scat6 = plt.scatter([predicted_state_b[0, 0, 0]], [predicted_state_b[0, 1, 0]], c='b', s=50, edgecolors='k')
+scat4 = plt.scatter([x_motion_b[0]], [y_motion_b[0]], c='g', s=50, edgecolors='k', marker=marker)
+scat5 = plt.scatter([x_obs_b[0]], [y_obs_b[0]], c='r', s=50, edgecolors='k', marker=marker)
+scat6 = plt.scatter([predicted_state_b[0, 0, 0]], [predicted_state_b[0, 1, 0]], c='b', s=50, edgecolors='k', marker=marker)
 
 scat7 = plt.scatter([x_afterassociative_a[0]], [y_afterassociative_a[0]], c='c', s=50 , edgecolors='k')
-scat8 = plt.scatter([x_afterassociative_b[0]], [y_afterassociative_b[0]], c='c', s=50, edgecolors='k')
+scat8 = plt.scatter([x_afterassociative_b[0]], [y_afterassociative_b[0]], c='c', s=50, edgecolors='k', marker=marker)
 
 line1.set_label('Actual motion a')
 line2.set_label('Observed motion a')

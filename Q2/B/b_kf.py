@@ -102,7 +102,7 @@ x_obs = [my_airplane.observation[j][0, 0] for j in range(T)]
 y_obs = [my_airplane.observation[j][1, 0] for j in range(T)]
 
 mu_0 = init_state
-sigma_0 = 0.01 * np.eye(4, 4)
+sigma_0 = 0.0001 * np.eye(4, 4)
 
 Bel = [(mu_0, sigma_0)]
 
