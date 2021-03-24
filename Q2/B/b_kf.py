@@ -53,25 +53,6 @@ def kalman_filter(mu, sigma, z, A, U, B, R, C, Q):
     sigma_t = (np.eye(4, 4) - K_t.dot(C)).dot(sigma_t_dash)
     return mu_t, sigma_t
 
-def _plot_gaussian(mean, covariance, ax, color='k', zorder=0):
-    """Plots the mean and 2-std ellipse of a given Gaussian"""
-    # plt.plot(mean[0], mean[1], color[0] + ".", zorder=zorder)
-
-    if covariance.ndim == 1:
-        covariance = np.diag(covariance)
-
-    radius = np.sqrt(5.991)
-    eigvals, eigvecs = np.linalg.eig(covariance)
-    axis = np.sqrt(eigvals) * radius
-    slope = eigvecs[1][0] / eigvecs[1][1]
-    angle = 180.0 * np.arctan(slope) / np.pi
-
-    ell = pat.Ellipse(
-        mean, axis[0], axis[1], angle=angle,
-        fill=False, color=color, linewidth=1, zorder=zorder, animated=True
-    )
-    return ax.add_patch(ell)
-
 U = np.zeros((2, 1))
 C = np.eye(2, 4)
 R = np.zeros((4, 4))

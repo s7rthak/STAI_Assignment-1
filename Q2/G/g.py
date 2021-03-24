@@ -64,6 +64,34 @@ def kalman_filter_without_measurements(mu, sigma, A, U, B, R):
 def U(Omega, t):
     return np.array([np.sin(Omega*t * np.pi / 180.), np.cos(Omega*t * np.pi / 180.)]).reshape((2, 1))
 
+def angle_from_rotmat(R):
+    return np.arctan2(R[1, 0], R[0, 0])
+
+def var_to_scale_theta(V):
+    w, E = np.linalg.eig(V)
+    scale = 3*w
+    theta = angle_from_rotmat(E)
+    return scale, theta
+
+def draw_ellipse(ax, scale, theta, x0, **kwargs):
+    ellipse = Ellipse((0,0),
+                      width=2*scale[0],
+                      height=2*scale[1],
+                      fill=False, color='b',
+                      **kwargs)
+
+    transf = transforms.Affine2D() \
+        .rotate_deg(theta * 180/np.pi) \
+        .translate(x0[0], x0[1])
+
+    ellipse.set_transform(transf + ax.transData)
+    return ax.add_patch(ellipse), ellipse
+
+def demo_plot_ellipse(V, mean, ax):
+    ellipse = draw_ellipse(ax, *var_to_scale_theta(V), mean)[1]
+    return ellipse
+
+
 C = np.eye(2, 4)
 R = np.zeros((4, 4))
 R[0, 0] = 1
@@ -134,58 +162,6 @@ ax.set_xticks(np.arange(-20, 200, 20))
 ax.set_yticks(np.arange(-20, 200, 20))
 ax.set_xlim([-20, 200])
 ax.set_ylim([-20, 200])
-
-# -------------------------------------------------------------------------------------------------------------------
-# taken from https://github.com/yugaro/machine-learning/tree/444db199d5f66d63c4bb60cb367f7b774c5cef7e/Bayesian-CBF
-
-
-def angle_from_rotmat(R):
-    """
-    >>> theta = np.random.rand() * 2*np.pi - np.pi
-    >>> thetae = angle_from_rotmat(rotmat2D(theta))
-    >>> np.allclose(thetae, theta)
-    True
-    """
-    return np.arctan2(R[1, 0], R[0, 0])
-
-def var_to_scale_theta(V):
-    """
-    >>> scale = np.abs(np.random.rand(2)) * 10
-    >>> theta = np.random.rand() * (2*np.pi) - np.pi
-    >>> s, t = var_to_scale_theta(scale_theta_to_var(scale, theta))
-    >>> allclose = partial(np.allclose, rtol=1e-2, atol=1e-5)
-    >>> allclose(s, scale)
-    True
-    >>> allclose(t, theta)
-    True
-    """
-    w, E = np.linalg.eig(V)
-    scale = 3*w
-    theta = angle_from_rotmat(E)
-    return scale, theta
-
-
-def draw_ellipse(ax, scale, theta, x0, **kwargs):
-    ellipse = Ellipse((0,0),
-                      width=2*scale[0],
-                      height=2*scale[1],
-                      fill=False, color='b',
-                      **kwargs)
-
-    transf = transforms.Affine2D() \
-        .rotate_deg(theta * 180/np.pi) \
-        .translate(x0[0], x0[1])
-
-    ellipse.set_transform(transf + ax.transData)
-    return ax.add_patch(ellipse), ellipse
-
-def demo_plot_ellipse(V, mean, ax):
-    ellipse = draw_ellipse(ax, *var_to_scale_theta(V), mean)[1]
-    return ellipse
-
-# ------------------------------------------------------------------------------------------------------------------
-
-
 
 line2, = ax.plot(x_obs, y_obs, color='r')
 line1, = ax.plot(x_motion, y_motion, color='g')

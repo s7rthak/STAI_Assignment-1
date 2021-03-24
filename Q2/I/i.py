@@ -61,10 +61,7 @@ def U(Omega, t):
     return np.array([np.sin(Omega*t * np.pi / 180.), np.cos(Omega*t * np.pi / 180.)]).reshape((2, 1))
 
 
-
-
 observation_table = []
-
 
 C_a = np.eye(2, 4)
 R_a = np.zeros((4, 4))

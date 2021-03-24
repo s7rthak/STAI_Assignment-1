@@ -55,35 +55,14 @@ def kalman_filter(mu, sigma, z, A, U, B, R, C, Q):
     sigma_t = (np.eye(4, 4) - K_t.dot(C)).dot(sigma_t_dash)
     return mu_t, sigma_t
 
-# -------------------------------------------------------------------------------------------------------------------
-# taken from https://github.com/yugaro/machine-learning/tree/444db199d5f66d63c4bb60cb367f7b774c5cef7e/Bayesian-CBF
-
-
 def angle_from_rotmat(R):
-    """
-    >>> theta = np.random.rand() * 2*np.pi - np.pi
-    >>> thetae = angle_from_rotmat(rotmat2D(theta))
-    >>> np.allclose(thetae, theta)
-    True
-    """
     return np.arctan2(R[1, 0], R[0, 0])
 
 def var_to_scale_theta(V):
-    """
-    >>> scale = np.abs(np.random.rand(2)) * 10
-    >>> theta = np.random.rand() * (2*np.pi) - np.pi
-    >>> s, t = var_to_scale_theta(scale_theta_to_var(scale, theta))
-    >>> allclose = partial(np.allclose, rtol=1e-2, atol=1e-5)
-    >>> allclose(s, scale)
-    True
-    >>> allclose(t, theta)
-    True
-    """
     w, E = np.linalg.eig(V)
     scale = 3*w
     theta = angle_from_rotmat(E)
     return scale, theta
-
 
 def draw_ellipse(ax, scale, theta, x0, **kwargs):
     ellipse = Ellipse((0,0),
@@ -102,8 +81,6 @@ def draw_ellipse(ax, scale, theta, x0, **kwargs):
 def demo_plot_ellipse(V, mean, ax):
     ellipse = draw_ellipse(ax, *var_to_scale_theta(V), mean)[1]
     return ellipse
-
-# ------------------------------------------------------------------------------------------------------------------
 
 U = np.zeros((2, 1))
 C = np.eye(2, 4)
