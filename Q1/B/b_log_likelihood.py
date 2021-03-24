@@ -6,7 +6,7 @@ import matplotlib.colors as colors
 import numpy as np
 import matplotlib.markers as markers
 
-T=30
+T = 40
 
 # initializing the probability matrix for bayes filter P[i,j,k]
 # i:time j:x-axis location k:y-axis location
